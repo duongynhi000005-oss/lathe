@@ -64,8 +64,7 @@ func TestInvokeOperation_CollectsAndProjectsSSE(t *testing.T) {
 	case <-out.wrote:
 	case <-time.After(200 * time.Millisecond):
 		close(release)
-		<-errCh
-		t.Fatal("live projection did not write before the response closed")
+		t.Fatalf("live projection did not write before the response closed: %v", <-errCh)
 	}
 	close(release)
 	if err := <-errCh; err != nil {

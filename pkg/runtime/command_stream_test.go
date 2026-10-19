@@ -71,8 +71,7 @@ func TestBuild_RawStreamingWritesBeforeResponseCloses(t *testing.T) {
 	case <-out.wrote:
 	case <-time.After(200 * time.Millisecond):
 		close(release)
-		<-errCh
-		t.Fatal("command produced no output before the streaming response closed")
+		t.Fatalf("command produced no output before the streaming response closed: %v", <-errCh)
 	}
 	close(release)
 	if err := <-errCh; err != nil {
