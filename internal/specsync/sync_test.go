@@ -15,6 +15,7 @@ import (
 )
 
 func TestSyncRejectsMovedTagWithExistingCheckout(t *testing.T) {
+	testutil.IsolateGitConfig(t)
 	upstream := filepath.Join(t.TempDir(), "upstream")
 	testutil.NoError(t, os.MkdirAll(upstream, 0o755))
 	runGit := func(args ...string) {
@@ -60,6 +61,7 @@ func TestSyncRejectsMovedTagWithExistingCheckout(t *testing.T) {
 }
 
 func TestSyncConcurrentProcessesShareCheckout(t *testing.T) {
+	testutil.IsolateGitConfig(t)
 	if name := os.Getenv("LATHE_SPECSYNC_CHILD"); name != "" {
 		cfg := &sourceconfig.Config{Sources: map[string]*sourceconfig.Source{
 			name: {
@@ -146,6 +148,7 @@ exec "$LATHE_SPECSYNC_REAL_GIT" "$@"
 }
 
 func TestSyncProtoStagesGitDependency(t *testing.T) {
+	testutil.IsolateGitConfig(t)
 	dependency := filepath.Join(t.TempDir(), "dependency")
 	testutil.NoError(t, os.MkdirAll(filepath.Join(dependency, "types"), 0o755))
 	testutil.NoError(t, os.WriteFile(filepath.Join(dependency, "types", "types.proto"), []byte("syntax = \"proto3\"; package types; message Value {}\n"), 0o644))

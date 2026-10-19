@@ -12,6 +12,7 @@ import (
 )
 
 func TestInitCreatesUncommittedRepositoryFromTemplateRef(t *testing.T) {
+	testutil.IsolateGitConfig(t)
 	parent := t.TempDir()
 	source := filepath.Join(parent, "template")
 	mustMkdirAll(t, filepath.Join(source, "cmd", "appctl"))
