@@ -33,6 +33,9 @@ func (a APIKeyAuth) header() string { return cmp.Or(a.Header, "X-API-Key") }
 
 func (a APIKeyAuth) Apply(req *http.Request) error {
 	if a.Key != "" {
+		if err := validateAuthHeader(a.header()); err != nil {
+			return err
+		}
 		req.Header.Set(a.header(), a.Key)
 	}
 	return nil
@@ -143,4 +146,32 @@ func NewAuthFromHost(e config.HostEntry) (Authenticator, error) {
 	default:
 		return nil, fmt.Errorf("unknown auth type: %q", e.AuthType)
 	}
+}
+
+func validateAuthHeader(name string) error {
+	if redirectHeaderAllowed(name) {
+		return fmt.Errorf("authentication header conflicts with HTTP request metadata")
+	}
+	return nil
+}
+
+func validateSecurityHeaders(h *SecurityHint, headers map[string]string) error {
+	if h == nil {
+		return nil
+	}
+	for _, requirement := range h.Requirements {
+		for _, scheme := range requirement.Schemes {
+			if scheme.Type != "apiKey" || scheme.In != "header" {
+				continue
+			}
+			for name, value := range headers {
+				if value != "" && strings.EqualFold(name, scheme.Param) {
+					if err := validateAuthHeader(name); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
