@@ -206,6 +206,9 @@ func resolveOperationRequest(s CommandSpec, input OperationInput, clientOpts Cli
 		hdrs["Content-Type"] = s.RequestBody.MediaType
 	}
 
+	if err := validateSecurityHeaders(s.Security, hdrs); err != nil {
+		return "", nil, ClientOptions{}, err
+	}
 	clientOpts.Headers = hdrs
 	if s.Output.ResponseMediaType != "" {
 		clientOpts.Accept = s.Output.ResponseMediaType

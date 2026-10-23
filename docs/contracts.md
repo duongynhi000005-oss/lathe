@@ -132,6 +132,40 @@ Japanese, and Thai, including combining marks. These matches score below
 exact tokens, prefixes, and English stems. Latin infix matches remain excluded;
 no language configuration is required.
 
+## HTTP redirects
+
+An origin consists of the scheme, hostname, and effective port. Hostnames and
+schemes are case-insensitive. Omitted ports use 80 for HTTP or 443 for HTTPS.
+
+On the first cross-origin hop and every later hop, the runtime forwards only
+these headers:
+
+- `Accept`
+- `Accept-Language`
+- `User-Agent`
+- `Range`
+- `If-Match`
+- `If-None-Match`
+- `If-Modified-Since`
+- `If-Unmodified-Since`
+- `If-Range`
+- `Content-Type`, only when the request body is replayed with the original method
+
+All other headers are removed, including authentication headers and `Referer`.
+These rules apply to generated operations, raw requests, and callers of
+`HTTPClient`. Headers supplied through `ClientOptions.Headers` follow the same
+rules. Callers must keep credentials out of the forwarded headers.
+Headers added by a custom `ClientOptions.Transport` after the redirect decision
+are not covered.
+
+Runtime authentication and declared header API keys reserve these names for
+request metadata. A conflicting credential header fails before any request is
+sent. Same-origin redirects keep Go's existing header handling.
+
+A redirect chain sends at most ten requests. Operation-specific restrictions,
+including rejection of cross-origin polling redirects, still apply. Request
+bodies and redirect target query parameters follow Go HTTP redirect rules.
+
 ## Verify report
 
 `<cli> __lathe verify --json`, implemented in `pkg/lathe/verify.go`, emits a

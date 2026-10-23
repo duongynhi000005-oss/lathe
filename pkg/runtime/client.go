@@ -51,7 +51,6 @@ func BaseURL(hostname string) (string, error) {
 	return strings.TrimRight(h, "/"), nil
 }
 
-// HTTPClient returns an http.Client configured per opts.
 func HTTPClient(opts ClientOptions) *http.Client {
 	return httpClient(opts, false)
 }
@@ -83,7 +82,7 @@ func httpClient(opts ClientOptions, streaming bool) *http.Client {
 	return &http.Client{
 		Timeout:       timeout,
 		Transport:     transport,
-		CheckRedirect: opts.checkRedirect,
+		CheckRedirect: redirectPolicy(opts),
 	}
 }
 
@@ -355,6 +354,11 @@ func newRequest(ctx context.Context, method, u string, body []byte, contentType 
 		if err := opts.Auth.Apply(req); err != nil {
 			return nil, fmt.Errorf("apply auth: %w", err)
 		}
+		for name := range req.Header {
+			if err := validateAuthHeader(name); err != nil {
+				return nil, err
+			}
+		}
 	}
 	accept := opts.Accept
 	if accept == "" {
@@ -388,8 +392,6 @@ func doRawFullOnce(req *http.Request, opts ClientOptions, consume responseConsum
 				if err := checkRedirect(req, via); err != nil {
 					return err
 				}
-			} else if len(via) >= 10 {
-				return errors.New("stopped after 10 redirects")
 			}
 			redirected = true
 			return nil
