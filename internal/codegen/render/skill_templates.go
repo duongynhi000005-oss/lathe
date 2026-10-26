@@ -134,7 +134,7 @@ func renderCatalogReference(manifest *config.Manifest) string {
 		fmt.Fprintf(&b, "Inspect effective account-scoped defaults with `%s auth context status -o json`; `local_set` reports whether `auth context set` is allowed. A command's explicit bound flag wins over its declared environment variable and stored host value.\n", cli)
 	}
 	b.WriteString("\n")
-	b.WriteString(renderCloudflareAccessGuidance(cli))
+	b.WriteString(strings.TrimSuffix(renderCloudflareAccessGuidance(cli), "\n"))
 	return b.String()
 }
 

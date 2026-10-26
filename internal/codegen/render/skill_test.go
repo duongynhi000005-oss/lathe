@@ -204,6 +204,7 @@ func TestRenderSkillDirectory_CloudflareAccessSetup(t *testing.T) {
 	var guidance string
 	for _, path := range []string{"SKILL.md", "references/catalog.md"} {
 		body := readFile(t, root, path)
+		testutil.Require(t, strings.HasSuffix(body, "\n") && !strings.HasSuffix(body, "\n\n"), "%s must end with a single newline", path)
 		_, section, found := strings.Cut(body, "## Cloudflare Access\n\n")
 		testutil.Require(t, found, "%s lacks Access setup guidance", path)
 		section, _, _ = strings.Cut(section, "\n## ")
